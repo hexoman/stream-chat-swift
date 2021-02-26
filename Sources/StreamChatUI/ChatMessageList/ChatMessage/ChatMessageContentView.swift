@@ -20,89 +20,27 @@ open class _ChatMessageContentView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
 
     // MARK: - Subviews
 
-    public private(set) lazy var messageBubbleView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .bubbleView.init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var messageBubbleView: _ChatMessageBubbleView<ExtraData>?
     
-    // --
-    public private(set) lazy var textView: UITextView = {
-        let textView = OnlyLinkTappableTextView()
-        textView.isEditable = false
-        textView.dataDetectorTypes = .link
-        textView.isScrollEnabled = false
-        textView.backgroundColor = .clear
-        textView.font = uiConfig.font.body
-        textView.adjustsFontForContentSizeCategory = true
-        textView.textContainerInset = .zero
-        textView.textContainer.lineFragmentPadding = 0
-        return textView.withoutAutoresizingMaskConstraints
-    }()
+    public private(set) var textView: UITextView?
     
-    public private(set) lazy var linkPreviewView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .linkPreviewView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var linkPreviewView: _ChatMessageLinkPreviewView<ExtraData>?
     
-    public private(set) lazy var quotedMessageView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .quotedMessageBubbleView.init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var quotedMessageView: _ChatMessageQuoteBubbleView<ExtraData>?
     
-    public private(set) lazy var attachmentsView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .attachmentSubviews
-        .attachmentsView
-        .init()
-        .withoutAutoresizingMaskConstraints
-    // --
+    public private(set) var attachmentsView: _ChatMessageAttachmentsView<ExtraData>?
 
-    public private(set) lazy var messageMetadataView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .metadataView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var messageMetadataView: _ChatMessageMetadataView<ExtraData>?
     
-    public private(set) lazy var authorAvatarView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .authorAvatarView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var authorAvatarView: ChatAvatarView?
 
-    public private(set) lazy var reactionsBubble = uiConfig
-        .messageList
-        .messageReactions
-        .reactionsBubbleView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var reactionsBubble: _ChatMessageReactionsBubbleView<ExtraData>?
 
-    public private(set) lazy var threadArrowView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .threadArrowView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var threadArrowView: _ChatMessageThreadArrowView<ExtraData>?
 
-    public private(set) lazy var threadView = uiConfig
-        .messageList
-        .messageContentSubviews
-        .threadInfoView
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var threadView: _ChatMessageThreadInfoView<ExtraData>?
 
-    public private(set) lazy var errorIndicator = uiConfig
-        .messageList
-        .messageContentSubviews
-        .errorIndicator
-        .init()
-        .withoutAutoresizingMaskConstraints
+    public private(set) var errorIndicator: _ChatMessageErrorIndicator<ExtraData>?
 
     var incomingMessageConstraints: [NSLayoutConstraint] = []
     var outgoingMessageConstraints: [NSLayoutConstraint] = []
@@ -120,23 +58,209 @@ open class _ChatMessageContentView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
     override open func setUp() {
         super.setUp()
 
+        
+        
+        
+        
+    }
+    
+    open func setupMessageBubbleView() {
+        guard messageBubbleView == nil else { return }
+        
+        let messageBubbleView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .bubbleView.init()
+            .withoutAutoresizingMaskConstraints
+        self.messageBubbleView = messageBubbleView
+        
+        addSubview(messageBubbleView)
+        
+        constraintsToActivate += [
+            messageBubbleView.trailingAnchor.pin(equalTo: trailingAnchor).almostRequired,
+            messageBubbleView.topAnchor.pin(equalTo: topAnchor).with(priority: .defaultHigh),
+            messageBubbleView.bottomAnchor.pin(equalTo: bottomAnchor).with(priority: .defaultHigh),
+        ]
+        
+        setNeedsUpdateConstraints()
+    }
+    
+    open func setupMetadataView() {
+        guard messageMetadataView == nil else { return }
+        
+        let messageMetadataView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .metadataView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        
+        self.messageMetadataView = messageMetadataView
+        
+        addSubview(messageMetadataView)
+    }
+    
+    open func setupAvatarView() {
+        guard authorAvatarView == nil else { return }
+        
+        let authorAvatarView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .authorAvatarView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.authorAvatarView = authorAvatarView
+        
+        addSubview(authorAvatarView)
+    }
+    
+    open func setupReactionsView() {
+        guard reactionsBubble == nil else { return }
+        
+        let reactionsBubble = uiConfig
+            .messageList
+            .messageReactions
+            .reactionsBubbleView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.reactionsBubble = reactionsBubble
+        
+        addSubview(reactionsBubble)
+        
         reactionsBubble.isUserInteractionEnabled = false
+    }
+    
+    open func setupThreadArrowView() {
+        guard threadArrowView == nil else { return }
+        
+        let threadArrowView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .threadArrowView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.threadArrowView = threadArrowView
+        
+        addSubview(threadArrowView)
+    }
+    
+    open func setupThreadView() {
+        guard threadView == nil else { return }
+        
+        let threadView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .threadInfoView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.threadView = threadView
+        
+        addSubview(threadView)
+        
         threadView.addTarget(self, action: #selector(didTapOnThread), for: .touchUpInside)
+    }
+    
+    open func setupErrorIndicator() {
+        guard errorIndicator == nil else { return }
+        
+        let errorIndicator = uiConfig
+            .messageList
+            .messageContentSubviews
+            .errorIndicator
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.errorIndicator = errorIndicator
+        
+        addSubview(errorIndicator)
+        
         errorIndicator.addTarget(self, action: #selector(didTapOnErrorIndicator), for: .touchUpInside)
+        
+        errorIndicator.setContentCompressionResistancePriority(.required, for: .horizontal)
+        errorIndicator.setContentCompressionResistancePriority(.required, for: .vertical)
+        
+        
+    }
+    
+    open func setupQuoteView() {
+        guard quotedMessageView == nil else { return }
+        
+        let quotedMessageView = uiConfig
+        .messageList
+        .messageContentSubviews
+        .quotedMessageBubbleView.init()
+        .withoutAutoresizingMaskConstraints
+        
+        self.quotedMessageView = quotedMessageView
+        
+        addSubview(quotedMessageView)
+        
+        quotedMessageView.isVisible = false
+    }
+    
+    open func setupLinkPreviewView() {
+        guard linkPreviewView == nil else { return }
+        
+        let linkPreviewView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .linkPreviewView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.linkPreviewView = linkPreviewView
+        
+        addSubview(linkPreviewView)
+        
+        linkPreviewView.isVisible = false
+        
         linkPreviewView.addTarget(self, action: #selector(didTapOnLinkPreview), for: .touchUpInside)
+    }
+    
+    open func setupTextView() {
+        guard textView == nil else { return }
+        
+        let textView = OnlyLinkTappableTextView()
+        textView.isEditable = false
+        textView.dataDetectorTypes = .link
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.font = uiConfig.font.body
+        textView.adjustsFontForContentSizeCategory = true
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        self.textView = textView
+        
+        addSubview(textView)
+    }
+    
+    open func setupAttachmentView() {
+        guard attachmentsView == nil, let messageBubbleView = messageBubbleView else { return }
+        
+        let attachmentsView = uiConfig
+            .messageList
+            .messageContentSubviews
+            .attachmentSubviews
+            .attachmentsView
+            .init()
+            .withoutAutoresizingMaskConstraints
+        self.attachmentsView = attachmentsView
+        
+        // We add `attachmentsView` as a subview to `bubbleView`
+        // so it's corners are properly masked
+        messageBubbleView.addSubview(attachmentsView)
+        
+        attachmentsView.isVisible = false
     }
 
     override open func setUpLayout() {
-        addSubview(messageBubbleView)
-        addSubview(messageMetadataView)
-        addSubview(authorAvatarView)
-        addSubview(reactionsBubble)
-        addSubview(threadArrowView)
-        addSubview(threadView)
-        addSubview(errorIndicator)
+        
+        
+        
+        
+        
+        
 
-        errorIndicator.setContentCompressionResistancePriority(.required, for: .horizontal)
-        errorIndicator.setContentCompressionResistancePriority(.required, for: .vertical)
+        
 
         incomingMessageIsThreadConstraints = [
             threadView.bottomAnchor.pin(equalTo: bottomAnchor),
@@ -156,9 +280,7 @@ open class _ChatMessageContentView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
             
             reactionsBubble.topAnchor.pin(equalTo: topAnchor),
             
-            messageBubbleView.trailingAnchor.pin(equalTo: trailingAnchor).almostRequired,
-            messageBubbleView.topAnchor.pin(equalTo: topAnchor).with(priority: .defaultHigh),
-            messageBubbleView.bottomAnchor.pin(equalTo: bottomAnchor).with(priority: .defaultHigh),
+            
             
             messageMetadataView.heightAnchor.pin(equalToConstant: 16),
             messageMetadataView.bottomAnchor.pin(equalTo: bottomAnchor),
@@ -217,18 +339,16 @@ open class _ChatMessageContentView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         )
         
         // --
-        addSubview(quotedMessageView)
-        addSubview(linkPreviewView)
-        addSubview(textView)
         
-        // We add `attachmentsView` as a subview to `bubbleView`
-        // so it's corners are properly masked
-        messageBubbleView.addSubview(attachmentsView)
+        
+        
+        
+        
         
         // Visibility of these views are controlled in their respective `update` methods
-        quotedMessageView.isVisible = false
-        linkPreviewView.isVisible = false
-        attachmentsView.isVisible = false
+        
+        
+        
         
         layoutConstraints[.attachments] = [
             attachmentsView.leadingAnchor.pin(equalTo: messageBubbleView.leadingAnchor),
