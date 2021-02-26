@@ -66,6 +66,8 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
     /// If we return wrong attributes user will see artifacts and broken layout during batch update animation.
     /// By not returning any attributes during batch updates we are able to prevent such artifacts.
     open var preBatchUpdatesCall = false
+    
+    open var preservedBottomContentOffset: CGFloat?
 
     // MARK: - Initialization
 
@@ -89,14 +91,9 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         forPreferredLayoutAttributes preferredAttributes: UICollectionViewLayoutAttributes,
         withOriginalAttributes originalAttributes: UICollectionViewLayoutAttributes
     ) -> Bool {
-        return true
-//        let idx = originalAttributes.indexPath.item
-//        return preferredAttributes.frame.minY != currentItems[idx].offset
-//            || preferredAttributes.frame.height != currentItems[idx].height
-    }
-    
-    open override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        (collectionView?.bounds.width ?? newBounds.width) == newBounds.width
+        let idx = originalAttributes.indexPath.item
+        return preferredAttributes.frame.minY != currentItems[idx].offset
+            || preferredAttributes.frame.height != currentItems[idx].height
     }
 
     override open func invalidationContext(
@@ -142,6 +139,7 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
     // MARK: - Animation updates
 
     override open func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
+        preservedBottomContentOffset = collectionView.map { collectionViewContentSize.height - $0.contentOffset.y }
         previousItems = currentItems
         let delete: (UICollectionViewUpdateItem) -> Void = { update in
             guard let ip = update.indexPathBeforeUpdate else { return }
@@ -200,7 +198,10 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         disappearingItems.removeAll()
         animatingAttributes.removeAll()
         super.finalizeCollectionViewUpdates()
-        collectionView?.scrollToItem(at: IndexPath(item: 0, section: 0), at: .bottom, animated: false)
+        
+        if let preservedBottomContentOffset = preservedBottomContentOffset {
+            collectionView?.contentOffset.y = currentItems[0].maxY - preservedBottomContentOffset
+        }
         // for some reason when adding / deleting items cv do not reload attributes for rows out of view
         // this will force reload
         invalidateLayout()
@@ -228,8 +229,7 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         }
 
         // scroll to make first item visible
-//        cv.contentOffset.y = currentItems[0].maxY - cv.bounds.height + cv.contentInset.bottom
-        cv.scrollToItem(at: IndexPath(item: 0, section: 0), at: .bottom, animated: false)
+        cv.contentOffset.y = currentItems[0].maxY - cv.bounds.height + cv.contentInset.bottom
     }
 
     override open func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {

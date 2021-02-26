@@ -180,7 +180,6 @@ open class _ChatMessageListVC<ExtraData: ExtraDataTypes>: _ViewController,
             collectionView.reloadItems(at: updates)
         } completion: { flag in
             completion?(flag)
-            self.scrollToMostRecentMessageIfNeeded()
         }
     }
     
