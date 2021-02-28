@@ -266,44 +266,44 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         return currentItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
     }
 
-    override open func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        let idx = itemIndexPath.item
-        if appearingItems.contains(itemIndexPath) {
-            // this is item that have been inserted into collection view in current batch update
-            let attribute = currentItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
-            animatingAttributes[itemIndexPath] = attribute
-            return attribute
-        } else {
-            // this is item that already presented in collection view, but collection view decided to reload it
-            // by removing and inserting it back (4head)
-            // to properly animate possible change of such item, we need to return its attributes BEFORE batch update
-            guard let id = idForItem(at: idx) else { return nil }
-            return oldIdxForItem(with: id).map { oldIdx in
-                previousItems[oldIdx].attribute(for: oldIdx, width: currentCollectionViewWidth)
-            }
-        }
-    }
+//    override open func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+//        let idx = itemIndexPath.item
+//        if appearingItems.contains(itemIndexPath) {
+//            // this is item that have been inserted into collection view in current batch update
+//            let attribute = currentItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
+//            animatingAttributes[itemIndexPath] = attribute
+//            return attribute
+//        } else {
+//            // this is item that already presented in collection view, but collection view decided to reload it
+//            // by removing and inserting it back (4head)
+//            // to properly animate possible change of such item, we need to return its attributes BEFORE batch update
+//            guard let id = idForItem(at: idx) else { return nil }
+//            return oldIdxForItem(with: id).map { oldIdx in
+//                previousItems[oldIdx].attribute(for: oldIdx, width: currentCollectionViewWidth)
+//            }
+//        }
+//    }
 
-    override open func finalLayoutAttributesForDisappearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        let idx = itemIndexPath.item
-        guard let id = oldIdForItem(at: idx) else { return nil }
-        if disappearingItems.contains(itemIndexPath) {
-            // item gets removed from collection view, we don't do any special delete animations for now, so just return
-            // item attributes BEFORE batch update and let it fade away
-            let attribute = previousItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
-            attribute.alpha = 0
-            return attribute
-        } else if let newIdx = idxForItem(with: id) {
-            // this is item that will stay in collection view, but collection view decided to reload it
-            // by removing and inserting it back (4head)
-            // to properly animate possible change of such item, we need to return its attributes AFTER batch update
-            let attribute = currentItems[newIdx].attribute(for: newIdx, width: currentCollectionViewWidth)
-            animatingAttributes[attribute.indexPath] = attribute
-            return attribute
-        }
-
-        return super.finalLayoutAttributesForDisappearingItem(at: itemIndexPath)
-    }
+//    override open func finalLayoutAttributesForDisappearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+//        let idx = itemIndexPath.item
+//        guard let id = oldIdForItem(at: idx) else { return nil }
+//        if disappearingItems.contains(itemIndexPath) {
+//            // item gets removed from collection view, we don't do any special delete animations for now, so just return
+//            // item attributes BEFORE batch update and let it fade away
+//            let attribute = previousItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
+//            attribute.alpha = 0
+//            return attribute
+//        } else if let newIdx = idxForItem(with: id) {
+//            // this is item that will stay in collection view, but collection view decided to reload it
+//            // by removing and inserting it back (4head)
+//            // to properly animate possible change of such item, we need to return its attributes AFTER batch update
+//            let attribute = currentItems[newIdx].attribute(for: newIdx, width: currentCollectionViewWidth)
+//            animatingAttributes[attribute.indexPath] = attribute
+//            return attribute
+//        }
+//
+//        return super.finalLayoutAttributesForDisappearingItem(at: itemIndexPath)
+//    }
 
     // MARK: - Access Layout Item
 
