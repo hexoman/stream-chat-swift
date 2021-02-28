@@ -55,6 +55,8 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
             height: currentItems.first?.maxY ?? 0
         )
     }
+    
+    open var isScrolling: Bool { collectionView.map { $0.isDragging || $0.isDecelerating } ?? false }
 
     open var currentCollectionViewWidth: CGFloat = 0
 
@@ -125,20 +127,24 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         // making unpleasant jump. To prevent it we need to adjust current content offset by item delta
         let isSizingElementAboveTopEdge = originalAttributes.frame.minY < (collectionView?.contentOffset.y ?? 0)
         // when collection view is idle and one of items change its attributes we adjust content offset to stick with bottom item
-        let isScrolling: Bool = {
-            guard let cv = collectionView else { return false }
-            return cv.isDragging || cv.isDecelerating
-        }()
         if isSizingElementAboveTopEdge || !isScrolling {
             invalidationContext.contentOffsetAdjustment = CGPoint(x: 0, y: delta)
         }
 
         return invalidationContext
     }
+    
+    open var preservedLayoutItem: (item: LayoutItem, offset: CGFloat)?
 
     // MARK: - Animation updates
 
     override open func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
+        if let cv = collectionView, let index = cv.indexPathsForVisibleItems.sorted().last?.item {
+            let currentOffset = cv.contentOffset.y
+            let layoutItem = currentItems[index]
+            preservedLayoutItem = (layoutItem, currentOffset - layoutItem.offset)
+        }
+        
         preservedBottomContentOffset = collectionView.map { collectionViewContentSize.height - $0.contentOffset.y }
         previousItems = currentItems
         let delete: (UICollectionViewUpdateItem) -> Void = { update in
@@ -199,9 +205,12 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         animatingAttributes.removeAll()
         super.finalizeCollectionViewUpdates()
         
-        if let preservedBottomContentOffset = preservedBottomContentOffset {
-            collectionView?.contentOffset.y = currentItems[0].maxY - preservedBottomContentOffset
+        if let preservedItem = preservedLayoutItem, let idx = idxForItem(with: preservedItem.item.id), !isScrolling {
+            let item = currentItems[idx]
+            collectionView?.contentOffset.y = item.offset + preservedItem.offset
         }
+        preservedLayoutItem = nil
+        
         // for some reason when adding / deleting items cv do not reload attributes for rows out of view
         // this will force reload
         invalidateLayout()
