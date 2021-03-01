@@ -30,6 +30,8 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
             return attribute
         }
     }
+    
+    public let mostRecentItem = IndexPath(item: 0, section: 0)
 
     /// Layout items before currently running batch update
     open var previousItems: [LayoutItem] = []
@@ -69,15 +71,22 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
     /// By not returning any attributes during batch updates we are able to prevent such artifacts.
     open var preBatchUpdatesCall = false
     
-    open var preservedBottomContentOffset: CGFloat?
+    public let scrollPreservation: MessageListScrollPreservation
 
     // MARK: - Initialization
 
     override public required init() {
+        scrollPreservation = MessageListMostRecentMessagePreservation()
+        super.init()
+    }
+    
+    internal init(scrollPreservation: MessageListScrollPreservation) {
+        self.scrollPreservation = scrollPreservation
         super.init()
     }
 
     public required init?(coder: NSCoder) {
+        self.scrollPreservation = MessageListMostRecentMessagePreservation()
         super.init(coder: coder)
     }
 
@@ -133,19 +142,12 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
 
         return invalidationContext
     }
-    
-    open var preservedLayoutItem: (item: LayoutItem, offset: CGFloat)?
 
     // MARK: - Animation updates
 
     override open func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
-        if let cv = collectionView, let index = cv.indexPathsForVisibleItems.sorted().last?.item {
-            let currentOffset = cv.contentOffset.y
-            let layoutItem = currentItems[index]
-            preservedLayoutItem = (layoutItem, currentOffset - layoutItem.offset)
-        }
+        scrollPreservation.prepareForUpdates(in: self)
         
-        preservedBottomContentOffset = collectionView.map { collectionViewContentSize.height - $0.contentOffset.y }
         previousItems = currentItems
         let delete: (UICollectionViewUpdateItem) -> Void = { update in
             guard let ip = update.indexPathBeforeUpdate else { return }
@@ -200,20 +202,18 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
     }
 
     override open func finalizeCollectionViewUpdates() {
+        let animatedScroll = appearingItems.contains(mostRecentItem)
+        
         appearingItems.removeAll()
         disappearingItems.removeAll()
         animatingAttributes.removeAll()
         super.finalizeCollectionViewUpdates()
         
-        if let preservedItem = preservedLayoutItem, let idx = idxForItem(with: preservedItem.item.id), !isScrolling {
-            let item = currentItems[idx]
-            collectionView?.contentOffset.y = item.offset + preservedItem.offset
-        }
-        preservedLayoutItem = nil
-        
         // for some reason when adding / deleting items cv do not reload attributes for rows out of view
         // this will force reload
         invalidateLayout()
+        
+        scrollPreservation.finalizeUpdates(in: self, animated: animatedScroll)
     }
 
     // MARK: - Main layout access
