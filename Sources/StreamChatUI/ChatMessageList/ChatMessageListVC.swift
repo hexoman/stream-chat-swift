@@ -147,26 +147,18 @@ open class _ChatMessageListVC<ExtraData: ExtraDataTypes>: _ViewController,
 
     public func updateMessages(with changes: [ListChange<_ChatMessage<ExtraData>>], completion: ((Bool) -> Void)? = nil) {
         collectionView.performBatchUpdates {
-            var inserts = [IndexPath]()
-            var deletions = [IndexPath]()
-            var updates = [IndexPath]()
-            
             for change in changes {
                 switch change {
                 case let .insert(_, index):
-                    inserts.append(index)
+                    collectionView.insertItems(at: [index])
                 case let .move(_, fromIndex, toIndex):
                     collectionView.moveItem(at: fromIndex, to: toIndex)
                 case let .remove(_, index):
-                    deletions.append(index)
+                    collectionView.deleteItems(at: [index])
                 case let .update(_, index):
-                    updates.append(index)
+                    collectionView.reloadItems(at: [index])
                 }
             }
-            
-            collectionView.insertItems(at: inserts)
-            collectionView.deleteItems(at: deletions)
-            collectionView.reloadItems(at: updates)
         } completion: { flag in
             completion?(flag)
         }
