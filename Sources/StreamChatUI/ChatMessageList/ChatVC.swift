@@ -33,7 +33,6 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
     private var navbarListener: ChatChannelNavigationBarListener<ExtraData>?
     
     private var messageComposerBottomConstraint: NSLayoutConstraint?
-    private var messageListBottomConstraint: NSLayoutConstraint?
     
     // MARK: - Life Cycle
 
@@ -46,12 +45,6 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         resignFirstResponder()
-    }
-    
-    private let keyPath = "bounds"
-    
-    deinit {
-        messageComposerViewController.view.removeObserver(self, forKeyPath: keyPath)
     }
 
     override open func setUp() {
@@ -72,20 +65,6 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
             name: UIResponder.keyboardWillChangeFrameNotification,
             object: nil
         )
-        
-        messageComposerViewController.view.addObserver(self, forKeyPath: keyPath, options: .new, context: nil)
-    }
-    
-    // There are some issues with new-style KVO so that is something that will need attention later.
-    // swiftlint:disable block_based_kvo
-    open override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey: Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        guard keyPath == self.keyPath, object as AnyObject? === messageComposerViewController.view else { return }
-        messageListBottomConstraint?.constant = -messageComposerViewController.composerView.intrinsicContentSize.height
     }
     
     @objc func keyboardWillChangeFrame(notification: NSNotification) {
@@ -138,6 +117,10 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
     override open func setUpLayout() {
         super.setUpLayout()
         
+        // Not a nice solution but as composer changes its intrinsicContentSize several times after getting on screen
+        // it creates ugly jump of message list, this way we can workaround it until this behavior is fixed
+        messageComposerViewController.view.layoutIfNeeded()
+        
         messageList.view.translatesAutoresizingMaskIntoConstraints = false
         messageComposerViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -147,8 +130,6 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
         messageList.view.leadingAnchor.pin(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         messageList.view.trailingAnchor.pin(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
         messageList.view.topAnchor.pin(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        messageListBottomConstraint = messageList.view.bottomAnchor.pin(lessThanOrEqualTo: view.bottomAnchor, constant: -messageList.view.systemLayoutSizeFitting(view.bounds.size).height)
-        messageListBottomConstraint?.isActive = true
         messageList.view.bottomAnchor.pin(equalTo: messageComposerViewController.view.topAnchor).isActive = true
 
         messageComposerViewController.view.leadingAnchor.pin(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
