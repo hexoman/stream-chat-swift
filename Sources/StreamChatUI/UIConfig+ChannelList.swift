@@ -17,7 +17,7 @@ public extension _UIConfig {
             _ChatChannelListCollectionViewCell<ExtraData>.self
         /// A button used for creating new channels.
         public var newChannelButton: UIButton.Type = _ChatChannelCreateNewButton<ExtraData>.self
-        public var channelNamer: ChatChannelNamer.Type = ChatChannelNamer.self
+        public var channelNamer: ChatChannelNamer<ExtraData> = DefaultChatChannelNamer()
         public var channelListItemSubviews = ChannelListItemSubviews()
     }
     
