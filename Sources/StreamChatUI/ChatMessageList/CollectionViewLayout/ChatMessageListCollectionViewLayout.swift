@@ -31,6 +31,7 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         }
     }
     
+    /// IndexPath for most recent message
     public let mostRecentItem = IndexPath(item: 0, section: 0)
 
     /// Layout items before currently running batch update
@@ -58,6 +59,7 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         )
     }
     
+    /// Shortcut to determine if `collectionView` is currently scrolling
     open var isScrolling: Bool { collectionView.map { $0.isDragging || $0.isDecelerating } ?? false }
 
     open var currentCollectionViewWidth: CGFloat = 0
@@ -71,6 +73,7 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
     /// By not returning any attributes during batch updates we are able to prevent such artifacts.
     open var preBatchUpdatesCall = false
     
+    /// Object that takes care of preserving correct scroll offset after layout updates
     public let scrollPreservation: MessageListScrollPreservation
 
     // MARK: - Initialization
@@ -266,6 +269,9 @@ open class ChatMessageListCollectionViewLayout: UICollectionViewLayout {
         return currentItems[idx].attribute(for: idx, width: currentCollectionViewWidth)
     }
 
+// For now commented out - will be returned in near future when appearance glitch is resolved - added items are initally
+// shortly visible on incorrect coordinates which doesn't look good on initial load
+//
 //    override open func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
 //        let idx = itemIndexPath.item
 //        if appearingItems.contains(itemIndexPath) {

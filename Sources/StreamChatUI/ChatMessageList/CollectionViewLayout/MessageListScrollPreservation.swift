@@ -6,7 +6,9 @@ import UIKit
 
 /// Protocol wrapping scroll offset preservation when changes to `ChatMessageListCollectionViewLayout` occur
 public protocol MessageListScrollPreservation {
+    /// Prepare for updates - useful for storing enough information to be able to decide about scroll offset later
     func prepareForUpdates(in layout: ChatMessageListCollectionViewLayout)
+    /// Here you should perform any updates to scroll offset
     func finalizeUpdates(in layout: ChatMessageListCollectionViewLayout, animated: Bool)
 }
 
