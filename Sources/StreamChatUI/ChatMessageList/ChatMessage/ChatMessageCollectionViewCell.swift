@@ -53,10 +53,7 @@ open class _СhatMessageCollectionViewCell<ExtraData: ExtraDataTypes>: _Collecti
         )
         
         let prototype = prototypes[Self.reuseId] as? Self ?? Self()
-        let prototypeContainer = UIView()
-        prototypeContainer.addSubview(prototype)
         prototypes[Self.reuseId] = prototype
-
         prototype.message = message
         prototype.streamSetup()
         preferredAttributes.frame.size = prototype.contentView.systemLayoutSizeFitting(
