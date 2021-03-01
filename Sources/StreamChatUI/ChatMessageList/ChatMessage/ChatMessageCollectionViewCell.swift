@@ -52,7 +52,7 @@ open class _СhatMessageCollectionViewCell<ExtraData: ExtraDataTypes>: _Collecti
             height: UIView.layoutFittingCompressedSize.height
         )
         
-        let prototype = prototypes[Self.reuseId] as? Self ?? Self.init()
+        let prototype = prototypes[Self.reuseId] as? Self ?? Self()
         let prototypeContainer = UIView()
         prototypeContainer.addSubview(prototype)
         prototypes[Self.reuseId] = prototype
