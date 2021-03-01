@@ -14,6 +14,10 @@ public protocol MessageListScrollPreservation {
 open class MessageListMostRecentMessagePreservation: MessageListScrollPreservation {
     open var mostRecentMessageWasVisible = false
     
+    public init() {
+        
+    }
+    
     open func prepareForUpdates(in layout: ChatMessageListCollectionViewLayout) {
         mostRecentMessageWasVisible = layout.collectionView?.indexPathsForVisibleItems.contains(layout.mostRecentItem) ?? false
     }

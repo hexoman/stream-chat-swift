@@ -7,7 +7,7 @@ import XCTest
 
 @testable import StreamChatUI
 
-final class ChatMessageListCollectionViewLayoutTests: XCTestCase {
+final class ChatMessageListCollectionViewLayout_Tests: XCTestCase {
     private var subject: ChatMessageListCollectionViewLayout!
     private var scrollPreservation: TestScrollPreservation!
     
@@ -46,6 +46,7 @@ final class ChatMessageListCollectionViewLayoutTests: XCTestCase {
         subject.finalizeCollectionViewUpdates()
         wait(for: [finalizeExpectation], timeout: 0.5)
     }
+    
     func testFinalizeCollectionViewDoesntAnimateScrollIfMostRecentMessageHaventChanged() {
         let finalizeExpectation = expectation(description: "Check finalize is called")
         scrollPreservation.finalizeUpdatesBody = { _, animated in
