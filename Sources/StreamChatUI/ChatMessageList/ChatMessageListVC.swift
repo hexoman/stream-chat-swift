@@ -161,6 +161,7 @@ open class _ChatMessageListVC<ExtraData: ExtraDataTypes>: _ViewController,
             }
         } completion: { flag in
             completion?(flag)
+            self.scrollToMostRecentMessageIfNeeded()
         }
     }
     
